@@ -33,10 +33,11 @@ var fastBlink = function (callback) {
 };
 
 var sendDataAndrestart = function(liters) {
-  var blink = 1;
+  var blink = 0;
   var ultraFastBlinkInterval = setInterval(function() {
-    myLed.write(blink ? 1 : 0);
-  }, 200);
+    blink = blink ? 0 : 1;
+    myLed.write(blink);
+  }, 50);
 
 
   console.log('Sending data...');
@@ -86,18 +87,17 @@ var waitForWakeUp = function() {
         console.log('Receiving gas!');
 
         // Count mililiters (1000 ms == 1 liter of gas)
-        var gasMililiters = 0;
+        var time = process.hrtime();
         var fillingInterval = setInterval(function() {
+          var diff = process.hrtime(time);
+          diff = diff[0] + (diff[1] * 1e-9);
           if (button.read() === BUTTON_UP) {
             clearInterval(fillingInterval);
-            sendDataAndrestart(gasMililiters / 1000);
-            return;
+            sendDataAndrestart(diff);
           }
-
-          gasMililiters += 10;
-        }, 10);
+        }, 1);
       }
-    }, 10);
+    }, 1);
   });
 };
 
